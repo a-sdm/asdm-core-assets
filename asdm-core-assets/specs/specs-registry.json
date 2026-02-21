@@ -28,6 +28,18 @@
       "dateUpdated": "2026-02-19T00:00:00Z",
       "createdBy": "ASDM Platform",
       "updatedBy": "ASDM Platform"
+    },
+    {
+      "id": "playwright-accessibility-testing",
+      "name": "Playwright Accessibility Testing Specs",
+      "description": "Comprehensive guidelines for accessibility testing using Playwright with TypeScript and axe-core",
+      "version": "1.0.0",
+      "path": "playwright-accessibility-testing",
+      "entry-point": "playwright-accessibility-testing/README.md",
+      "dateCreated": "2026-02-19T00:00:00Z",
+      "dateUpdated": "2026-02-19T00:00:00Z",
+      "createdBy": "ASDM Platform",
+      "updatedBy": "ASDM Platform"
     }
   ]
 }

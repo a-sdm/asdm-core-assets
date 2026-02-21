@@ -28,6 +28,14 @@ specs/
 │   ├── component-naming-structure.md
 │   ├── private-shared-components.md
 │   └── performance-optimization.md
+├── playwright-accessibility-testing/ # Playwright accessibility testing specs
+│   ├── README.md
+│   ├── accessibility-testing-basics.md
+│   ├── playwright-accessibility-setup.md
+│   ├── axe-core-integration.md
+│   ├── wcag-compliance-testing.md
+│   ├── keyboard-navigation-testing.md
+│   └── aria-validation.md
 └── {technology}/         # Additional tech stacks
     └── README.md
 ```
@@ -46,6 +54,14 @@ specs/
 - [Component Naming & Directory Structure](nextjs-react-tailwind/component-naming-structure.md)
 - [Private vs Shared Components](nextjs-react-tailwind/private-shared-components.md)
 - [Performance Optimization](nextjs-react-tailwind/performance-optimization.md)
+
+### Playwright Accessibility Testing
+- [Accessibility Testing Basics](playwright-accessibility-testing/accessibility-testing-basics.md)
+- [Playwright Accessibility Setup](playwright-accessibility-testing/playwright-accessibility-setup.md)
+- [axe-core Integration](playwright-accessibility-testing/axe-core-integration.md)
+- [WCAG Compliance Testing](playwright-accessibility-testing/wcag-compliance-testing.md)
+- [Keyboard Navigation Testing](playwright-accessibility-testing/keyboard-navigation-testing.md)
+- [ARIA Validation](playwright-accessibility-testing/aria-validation.md)
 
 ## Adding New Specs
 
