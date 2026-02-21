@@ -59,6 +59,16 @@ specs/
 │   ├── dtos.md
 │   ├── rest-controllers.md
 │   └── response-handling.md
+├── java-general/ # Java general purpose specs
+│   ├── README.md
+│   ├── creating-objects.md
+│   ├── classes-interfaces.md
+│   ├── generics-enums.md
+│   ├── lambdas-streams.md
+│   ├── methods-api-design.md
+│   ├── exceptions-concurrency.md
+│   ├── serialization.md
+│   └── programming-paradigms.md
 └── {technology}/         # Additional tech stacks
     └── README.md
 ```
@@ -108,6 +118,16 @@ specs/
 - [DTOs](java-springboot-jpa/dtos.md)
 - [REST Controllers](java-springboot-jpa/rest-controllers.md)
 - [Response Handling](java-springboot-jpa/response-handling.md)
+
+### Java General Purpose
+- [Creating Objects](java-general/creating-objects.md)
+- [Classes and Interfaces](java-general/classes-interfaces.md)
+- [Generics and Enums](java-general/generics-enums.md)
+- [Lambdas and Streams](java-general/lambdas-streams.md)
+- [Methods and API Design](java-general/methods-api-design.md)
+- [Exceptions and Concurrency](java-general/exceptions-concurrency.md)
+- [Serialization](java-general/serialization.md)
+- [Programming Paradigms](java-general/programming-paradigms.md)
 
 ## Adding New Specs
 

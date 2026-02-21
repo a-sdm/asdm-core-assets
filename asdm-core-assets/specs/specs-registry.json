@@ -76,6 +76,18 @@
       "dateUpdated": "2026-02-21T00:00:00Z",
       "createdBy": "ASDM Platform",
       "updatedBy": "ASDM Platform"
+    },
+    {
+      "id": "java-general",
+      "name": "Java General Purpose Specs",
+      "description": "Comprehensive Java development guidelines based on Effective Java, covering objects, classes, generics, enums, lambdas, streams, methods, exceptions, concurrency, and serialization",
+      "version": "1.0.0",
+      "path": "java-general",
+      "entry-point": "java-general/README.md",
+      "dateCreated": "2026-02-21T00:00:00Z",
+      "dateUpdated": "2026-02-21T00:00:00Z",
+      "createdBy": "ASDM Platform",
+      "updatedBy": "ASDM Platform"
     }
   ]
 }
