@@ -40,6 +40,30 @@
       "dateUpdated": "2026-02-19T00:00:00Z",
       "createdBy": "ASDM Platform",
       "updatedBy": "ASDM Platform"
+    },
+    {
+      "id": "playwright-integration-testing",
+      "name": "Playwright Integration Testing Specs",
+      "description": "Comprehensive guidelines for integration testing using Playwright with TypeScript",
+      "version": "1.0.0",
+      "path": "playwright-integration-testing",
+      "entry-point": "playwright-integration-testing/README.md",
+      "dateCreated": "2026-02-19T00:00:00Z",
+      "dateUpdated": "2026-02-19T00:00:00Z",
+      "createdBy": "ASDM Platform",
+      "updatedBy": "ASDM Platform"
+    },
+    {
+      "id": "playwright-e2e-testing",
+      "name": "Playwright E2E Testing Specs",
+      "description": "End-to-end UI testing guidelines using Playwright and TypeScript for web applications",
+      "version": "1.0.0",
+      "path": "playwright-e2e-testing",
+      "entry-point": "playwright-e2e-testing/README.md",
+      "dateCreated": "2026-02-21T00:00:00Z",
+      "dateUpdated": "2026-02-21T00:00:00Z",
+      "createdBy": "ASDM Platform",
+      "updatedBy": "ASDM Platform"
     }
   ]
 }

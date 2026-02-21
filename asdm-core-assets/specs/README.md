@@ -36,6 +36,20 @@ specs/
 │   ├── wcag-compliance-testing.md
 │   ├── keyboard-navigation-testing.md
 │   └── aria-validation.md
+├── playwright-integration-testing/ # Playwright integration testing specs
+│   ├── README.md
+│   ├── integration-testing-basics.md
+│   ├── api-mocking-with-playwright.md
+│   ├── user-flow-testing.md
+│   ├── component-interaction-testing.md
+│   └── state-management-testing.md
+├── playwright-e2e-testing/ # Playwright E2E testing specs
+│   ├── README.md
+│   ├── e2e-testing-basics.md
+│   ├── test-structure.md
+│   ├── selector-strategy.md
+│   ├── api-mocking-e2e.md
+│   └── user-flow-testing.md
 └── {technology}/         # Additional tech stacks
     └── README.md
 ```
@@ -62,6 +76,20 @@ specs/
 - [WCAG Compliance Testing](playwright-accessibility-testing/wcag-compliance-testing.md)
 - [Keyboard Navigation Testing](playwright-accessibility-testing/keyboard-navigation-testing.md)
 - [ARIA Validation](playwright-accessibility-testing/aria-validation.md)
+
+### Playwright Integration Testing
+- [Integration Testing Basics](playwright-integration-testing/integration-testing-basics.md)
+- [API Mocking with Playwright](playwright-integration-testing/api-mocking-with-playwright.md)
+- [User Flow Testing](playwright-integration-testing/user-flow-testing.md)
+- [Component Interaction Testing](playwright-integration-testing/component-interaction-testing.md)
+- [State Management Testing](playwright-integration-testing/state-management-testing.md)
+
+### Playwright E2E Testing
+- [E2E Testing Basics](playwright-e2e-testing/e2e-testing-basics.md)
+- [Test Structure](playwright-e2e-testing/test-structure.md)
+- [Selector Strategy](playwright-e2e-testing/selector-strategy.md)
+- [API Mocking for E2E](playwright-e2e-testing/api-mocking-e2e.md)
+- [User Flow Testing](playwright-e2e-testing/user-flow-testing.md)
 
 ## Adding New Specs
 
