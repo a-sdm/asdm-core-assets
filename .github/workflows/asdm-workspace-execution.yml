@@ -23,6 +23,7 @@ jobs:
       - name: Execute task with CodeBuddy
         env:
           CODEBUDDY_API_KEY: ${{ secrets.CODEBUDDY_API_KEY }}
+          CODEBUDDY_INTERNET_ENVIRONMENT: ${{ secrets.CODEBUDDY_INTERNET_ENVIRONMENT }}
         run: |
           codebuddy -p "输出你的环境变量" \
             --permission-mode acceptEdits \
