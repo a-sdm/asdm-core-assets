@@ -12,6 +12,14 @@ on:
         required: false
         default: 'main'
         type: string
+      prompt-type:
+        description: 'Analysis prompt type'
+        required: true
+        default: 'general'
+        type: choice
+        options:
+          - general
+          - springboot-api
 
 env:
   ACTIONS_STEP_DEBUG: true
@@ -103,12 +111,25 @@ jobs:
           CODEBUDDY_INTERNET_ENVIRONMENT: ${{ secrets.CODEBUDDY_INTERNET_ENVIRONMENT }}
           REPO_NAME: ${{ steps.clone-repo.outputs.REPO_NAME }}
           RESULT_DIR: ${{ steps.create-result-dir.outputs.RESULT_DIR }}
+          PROMPT_TYPE: ${{ inputs.prompt-type }}
         run: |
           cd "$REPO_NAME"
           
           LOG_FILE="${{ github.workspace }}/analysis.log"
           PARSER="${{ github.workspace }}/tools/codebuddy-log-parser/dist/index.js"
-          PROMPT_FILE="${{ github.workspace }}/.github/workflows/ANALYSIS_PROMPT.md"
+          
+          # Select prompt file based on prompt-type input
+          case "$PROMPT_TYPE" in
+            springboot-api)
+              PROMPT_FILE="${{ github.workspace }}/.github/workflows/ANALYSIS_PROMPT_SpringBoot_API.md"
+              ;;
+            general|*)
+              PROMPT_FILE="${{ github.workspace }}/.github/workflows/ANALYSIS_PROMPT.md"
+              ;;
+          esac
+          
+          echo "Selected prompt type: $PROMPT_TYPE"
+          echo "Using prompt file: $PROMPT_FILE"
           
           # Read prompt template and replace placeholder with actual result directory
           ANALYSIS_PROMPT=$(sed "s|{RESULT_DIR}|$RESULT_DIR|g" "$PROMPT_FILE")
@@ -154,7 +175,8 @@ jobs:
             "analysis": {
               "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
               "workflow_run_id": "${{ github.run_id }}",
-              "result_directory": "$RESULT_DIR"
+              "result_directory": "$RESULT_DIR",
+              "prompt_type": "${{ inputs.prompt-type }}"
             }
           }
           EOF
@@ -190,6 +212,7 @@ jobs:
           echo "======================================"
           echo "Repository: ${{ inputs.repo-url }}"
           echo "Branch: ${{ steps.clone-repo.outputs.ACTUAL_BRANCH }}"
+          echo "Prompt Type: ${{ inputs.prompt-type }}"
           echo "Result directory: ${{ steps.create-result-dir.outputs.RESULT_DIR }}"
           echo ""
           echo "Artifacts:"

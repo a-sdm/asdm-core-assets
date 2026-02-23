@@ -1,0 +1,9 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2026-02-23T14:09:20.413Z
+provider: 
+---
+
+所有代码，文档和内嵌在代码中的内容都必须使用英文以确保本代码库可以被更好的国际化，包括注释、变量名、函数名、类名、文件名、路径名、属性名、属性值等。
