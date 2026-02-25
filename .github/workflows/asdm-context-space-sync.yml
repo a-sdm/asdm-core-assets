@@ -97,13 +97,16 @@ jobs:
           cd "$REPO_NAME"
           echo "Current commit: $(git log -1 --oneline)"
 
-      - name: Create context-space-result directory
+      - name: Create asdm-context-space-result directory
         id: create-result-dir
+        env:
+          REPO_NAME: ${{ steps.clone-repo.outputs.REPO_NAME }}
         run: |
-          RESULT_DIR="${{ github.workspace }}/context-space-result"
+          cd "$REPO_NAME"
+          RESULT_DIR="$(pwd)/asdm-context-space-result"
           mkdir -p "$RESULT_DIR"
           echo "RESULT_DIR=$RESULT_DIR" >> $GITHUB_OUTPUT
-          echo "Created context-space-result directory at: $RESULT_DIR"
+          echo "Created asdm-context-space-result directory at: $RESULT_DIR"
 
       - name: Analyze repository with CodeBuddy
         env:
@@ -150,6 +153,8 @@ jobs:
 
       - name: Parse final log
         if: always()
+        env:
+          RESULT_DIR: ${{ steps.create-result-dir.outputs.RESULT_DIR }}
         run: |
           LOG_FILE="${{ github.workspace }}/analysis.log"
           PARSER="${{ github.workspace }}/tools/codebuddy-log-parser/dist/index.js"
@@ -160,7 +165,7 @@ jobs:
             cat "$LOG_FILE" | node "$PARSER" --stdin -f human-chat --no-color 2>/dev/null || echo "Log file exists but parser failed"
             
             # Also generate JSON output for artifacts
-            cat "$LOG_FILE" | node "$PARSER" --stdin -f json > "${{ github.workspace }}/context-space-result/analysis-log.json" 2>/dev/null || true
+            cat "$LOG_FILE" | node "$PARSER" --stdin -f json > "$RESULT_DIR/analysis-log.json" 2>/dev/null || true
           fi
 
       - name: Generate context space metadata
@@ -206,12 +211,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: context-space-result
-          path: context-space-result/
+          name: asdm-context-space-result
+          path: ${{ steps.clone-repo.outputs.REPO_NAME }}/asdm-context-space-result/
           retention-days: 30
 
       - name: Summary
         if: always()
+        env:
+          REPO_NAME: ${{ steps.clone-repo.outputs.REPO_NAME }}
         run: |
           echo "======================================"
           echo "Context Space Sync Completed"
@@ -222,9 +229,9 @@ jobs:
           echo "Result directory: ${{ steps.create-result-dir.outputs.RESULT_DIR }}"
           echo ""
           echo "Artifacts:"
-          echo "  - context-space-result: Analysis results (30 days retention)"
+          echo "  - asdm-context-space-result: Analysis results (30 days retention)"
           echo "  - analysis-logs: Execution logs (7 days retention)"
           echo ""
           echo "Generated files:"
-          ls -la context-space-result/ 2>/dev/null || echo "No files in result directory"
+          ls -la "$REPO_NAME/asdm-context-space-result/" 2>/dev/null || echo "No files in result directory"
           echo "======================================"
