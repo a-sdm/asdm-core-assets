@@ -7,6 +7,14 @@ on:
         description: 'Prompt text for CodeBuddy'
         required: true
         default: ''
+      workspace-git-url:
+        description: 'Git URL of the workspace repository to work on'
+        required: true
+        default: ''
+      workspace-git-branch:
+        description: 'Branch of the workspace repository to checkout'
+        required: false
+        default: 'main'
       verbose:
         description: 'Enable verbose logging'
         required: false
@@ -33,6 +41,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Checkout workspace repository
+        env:
+          WORKSPACE_GIT_URL: ${{ github.event.inputs.workspace-git-url }}
+          WORKSPACE_GIT_BRANCH: ${{ github.event.inputs.workspace-git-branch }}
+        run: |
+          git clone --branch "$WORKSPACE_GIT_BRANCH" --single-branch "$WORKSPACE_GIT_URL" workspace
+          echo "Workspace repository cloned to: $(pwd)/workspace"
+          ls -la workspace
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -53,6 +70,7 @@ jobs:
         env:
           CODEBUDDY_API_KEY: ${{ secrets.CODEBUDDY_API_KEY }}
           CODEBUDDY_INTERNET_ENVIRONMENT: ${{ secrets.CODEBUDDY_INTERNET_ENVIRONMENT }}
+        working-directory: ${{ github.workspace }}/workspace
         run: |
           LOG_FILE="${{ github.workspace }}/execution.log"
           PARSER="${{ github.workspace }}/tools/codebuddy-log-parser/dist/index.js"
@@ -63,6 +81,8 @@ jobs:
           fi
           
           echo "=== CodeBuddy Execution Log (human-chat format) ==="
+          echo ""
+          echo "Working directory: $(pwd)"
           echo ""
           
           # Run codebuddy with stream-json, save to file and parse in real-time via pipe
