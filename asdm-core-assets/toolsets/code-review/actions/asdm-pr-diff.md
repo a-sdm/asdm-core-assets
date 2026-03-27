@@ -2,19 +2,21 @@
 
 ## Overview
 
-This action retrieves and formats the diff of a Pull Request, providing a structured view of all changes for analysis.
+This action retrieves and formats the diff of a Pull Request by
+calling GitHub MCP tools, providing a structured view of all changes
+for analysis.
 
 ## Purpose
 
-- Retrieve PR changes from the repository
+- Retrieve PR metadata and changed files via GitHub MCP Server
 - Format diff output for easy analysis
 - Support code review workflows
 - Enable change analysis
 
 ## Prerequisites
 
-- Access to the Pull Request system (GitHub, GitLab, Bitbucket, etc.)
-- PR number or PR identifier
+- GitHub MCP Server must be connected and available
+- PR number is required
 - Appropriate repository access permissions
 
 ## Input
@@ -25,9 +27,26 @@ This action retrieves and formats the diff of a Pull Request, providing a struct
 
 ## Steps
 
+### 0. Resolve Repository
+
+Determine the GitHub `owner` and `repo` from the current workspace:
+
+1. Run `git remote -v` to find the remote URL
+2. Parse `owner` and `repo` from the URL
+   - HTTPS: `https://github.com/{owner}/{repo}.git`
+   - SSH: `git@github.com:{owner}/{repo}.git`
+
 ### 1. Get PR Basic Information
 
-First, retrieve the PR metadata using your repository's API:
+Use the GitHub MCP Server to retrieve PR metadata:
+
+**MCP Call**: `get_pull_request`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
 
 This returns:
 - PR title and description
@@ -36,48 +55,35 @@ This returns:
 - Status (open, merged, closed)
 - Number of changed files, additions, deletions
 
-### 2. Fetch PR Diff
+### 2. List Changed Files
 
-Retrieve the complete diff using your repository's API.
+**MCP Call**: `get_pull_request_files`
 
-### 3. List Changed Files
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
 
-Get the list of files changed in the PR using your repository's API.
+This returns the full list of changed files with per-file
+additions, deletions, and patch content.
+
+### 3. (Optional) Fetch File Content for Specific Files
+
+For files that need deeper analysis, use:
+
+**MCP Call**: `get_file_contents`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `path` | `{file_path}` |
+| `branch` | Target branch of the PR |
 
 ### 4. Parse and Format Output
 
-Organize the diff output into a structured format:
-
-```json
-{
-  "pr_number": "{PR_NUMBER}",
-  "pr_title": "Title of the PR",
-  "source_branch": "feature/branch-name",
-  "target_branch": "main",
-  "author": "username",
-  "stats": {
-    "files_changed": 5,
-    "additions": 150,
-    "deletions": 30
-  },
-  "files": [
-    {
-      "path": "src/components/Button.tsx",
-      "status": "modified|added|deleted|renamed",
-      "additions": 20,
-      "deletions": 5,
-      "changes": [
-        {
-          "type": "addition|deletion|modification",
-          "line_number": 42,
-          "content": "Code content here",
-          "context": "Surrounding context"
-        }
-      ]
-    }
-  ]
-}
-```
+Organize the results into the structured format below.
 
 ## Output Format
 
@@ -86,7 +92,7 @@ Organize the diff output into a structured format:
 ```
 PR #{PR_NUMBER}: {PR_TITLE}
 Author: {author}
-Branch: {source_branch} → {target_branch}
+Branch: {source_branch} -> {target_branch}
 Files: {files_changed} changed, +{additions} -{deletions}
 
 Changed Files:
@@ -97,7 +103,8 @@ Changed Files:
 
 ### Detailed Diff View
 
-For each file, provide:
+For each file, extract the patch content from
+`get_pull_request_files` response and present:
 
 ```diff
 --- a/src/path/to/file.ext
@@ -127,7 +134,8 @@ For each file, provide:
 /asdm-pr-diff 123
 
 # Or follow the instruction
-Follow the instructions in .asdm/toolsets/code-review/actions/asdm-pr-diff.md
+Follow the instructions in
+.asdm/toolsets/code-review/actions/asdm-pr-diff.md
 ```
 
 ### Filter by File Pattern
@@ -151,13 +159,23 @@ This action is typically used as a prerequisite for:
 - `asdm-pr-review`: Provides the diff for review analysis
 - `asdm-pr-summary`: Uses diff data for summary generation
 
+## MCP Tool Reference
+
+| MCP Server | Tool | Purpose |
+|------------|------|---------|
+| GitHub MCP Server | `get_pull_request` | Get PR metadata |
+| GitHub MCP Server | `get_pull_request_files` | Get changed files with patch |
+| GitHub MCP Server | `get_file_contents` | Get file content by path |
+
 ## Notes
 
-- Large PRs may have truncated output; handle pagination if needed
+- Large PRs may have truncated patch content; use `get_file_contents`
+  for specific files when needed
 - Binary files show only metadata, not content diff
 - Consider file size limits for very large diffs
 - Use file filtering for focused analysis
 
 ## Configuration
 
-Refer to [pr-analysis-spec.md](../specs/pr-analysis-spec.md) for detailed analysis methodology.
+Refer to [pr-analysis-spec.md](../specs/pr-analysis-spec.md)
+for detailed analysis methodology.

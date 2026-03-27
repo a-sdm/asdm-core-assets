@@ -2,7 +2,9 @@
 
 ## Overview
 
-This action performs a quick, lightweight code review on a Pull Request, focusing on common issues and providing rapid feedback.
+This action performs a quick, lightweight code review on a Pull
+Request by fetching data via GitHub MCP tools, focusing on common
+issues and providing rapid feedback.
 
 ## Purpose
 
@@ -12,40 +14,91 @@ This action performs a quick, lightweight code review on a Pull Request, focusin
 - Verify basic best practices
 - Enable quick iteration cycles
 
-## Steps
+## Prerequisites
 
-1. **Quick Scan**
-   - Get PR diff summary
-   - Identify file types and changes
-   - Assess scope of changes
-
-2. **Basic Quality Check**
-   - Check for syntax errors
-   - Verify code formatting
-   - Identify obvious logic errors
-   - Check for missing error handling
-
-3. **Common Issues Detection**
-   - Detect common anti-patterns
-   - Check for TODO/FIXME comments
-   - Identify unused imports/variables
-   - Check for debug code left in
-
-4. **Style Verification**
-   - Check naming conventions
-   - Verify consistent formatting
-   - Check line length limits
-   - Verify proper indentation
-
-5. **Quick Summary**
-   - Summarize findings
-   - Highlight quick wins
-   - Provide actionable feedback
+- GitHub MCP Server must be connected and available
+- PR number or PR URL is required
 
 ## Input
 
-- PR number or URL
-- Optional: specific focus areas
+- **PR Number**: The identifier of the Pull Request (required)
+- **Focus Areas**: Optional specific focus areas
+
+## Steps
+
+### 0. Resolve Repository
+
+Determine the GitHub `owner` and `repo` from the current workspace:
+
+1. Run `git remote -v` to find the remote URL
+2. Parse `owner` and `repo` from the URL
+   - HTTPS: `https://github.com/{owner}/{repo}.git`
+   - SSH: `git@github.com:{owner}/{repo}.git`
+
+### 1. Language Detection (MUST be first)
+
+Detect and use the current environment's response language:
+
+1. Check system/user language settings or environment configuration
+2. Identify the primary language used in project documentation
+3. Apply the detected language consistently to ALL output
+
+### 2. Gather PR Data via MCP
+
+Call the following MCP tools in parallel:
+
+**MCP Call**: `get_pull_request`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
+
+**MCP Call**: `get_pull_request_files`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
+
+### 3. Quick Scan
+
+Based on the MCP response:
+
+- Identify file types and changes from `get_pull_request_files`
+- Assess scope of changes (file count, line count)
+- Categorize changes (source code, config, docs, tests)
+
+### 4. Basic Quality Check
+
+Using the patch content from `get_pull_request_files`:
+
+- Check for syntax errors
+- Verify code formatting
+- Identify obvious logic errors
+- Check for missing error handling
+
+### 5. Common Issues Detection
+
+- Detect common anti-patterns
+- Check for TODO/FIXME comments
+- Identify unused imports/variables
+- Check for debug code left in
+
+### 6. Style Verification
+
+- Check naming conventions
+- Verify consistent formatting
+- Check line length limits
+- Verify proper indentation
+
+### 7. Quick Summary
+
+- Summarize findings
+- Highlight quick wins
+- Provide actionable feedback
 
 ## Output
 
@@ -54,13 +107,6 @@ This action performs a quick, lightweight code review on a Pull Request, focusin
   - Top issues to address
   - Style/formatting suggestions
   - Quick wins for improvement
-
-## Language Detection
-
-Before performing review, detect and use the current environment's response language:
-
-1. **Detect Response Language**: Analyze the environment settings
-2. **Apply Language Consistency**: Ensure all output uses the detected language
 
 ## Quick Check Items
 
@@ -99,16 +145,12 @@ Before performing review, detect and use the current environment's response lang
 | Should Fix | Style or quality issues | Recommend fixing |
 | Consider | Minor improvements | Optional |
 
-## Usage
+## MCP Tool Reference
 
-This action is invoked when a user needs quick feedback on a Pull Request.
-
-### Example Invocation
-
-```shell
-# Quick review of PR #123
-Follow the instructions in .asdm/toolsets/code-review/actions/asdm-pr-quick-review.md
-```
+| MCP Server | Tool | Purpose |
+|------------|------|---------|
+| GitHub MCP Server | `get_pull_request` | Get PR metadata |
+| GitHub MCP Server | `get_pull_request_files` | Get changed files with patch |
 
 ## Output Format
 

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This action generates a comprehensive summary of Pull Request changes, providing a high-level overview of modifications and their impact.
+This action generates a comprehensive summary of Pull Request
+changes by calling GitHub MCP tools, providing a high-level
+overview of modifications and their impact.
 
 ## Purpose
 
@@ -13,29 +15,62 @@ This action generates a comprehensive summary of Pull Request changes, providing
 
 ## Prerequisites
 
-- Access to the Pull Request system (GitHub, GitLab, Bitbucket, etc.)
-- PR number or PR identifier
-- Appropriate repository access permissions
+- GitHub MCP Server must be connected and available
+- PR number is required
 
 ## Input
 
 - **PR Number**: The identifier of the Pull Request (required)
-- **Detail Level**: Optional (brief/standard/detailed), default: standard
-- **Focus Areas**: Optional areas to highlight (e.g., API, database, UI)
+- **Detail Level**: Optional (brief/standard/detailed),
+  default: standard
+- **Focus Areas**: Optional areas to highlight
+  (e.g., API, database, UI)
 
 ## Steps
 
-### 1. Retrieve PR Information
+### 0. Resolve Repository
 
-Get the PR metadata and description using your repository's API.
+Determine the GitHub `owner` and `repo` from the current workspace:
 
-### 2. Fetch Changed Files List
+1. Run `git remote -v` to find the remote URL
+2. Parse `owner` and `repo` from the URL
+   - HTTPS: `https://github.com/{owner}/{repo}.git`
+   - SSH: `git@github.com:{owner}/{repo}.git`
 
-Get the list of changed files using your repository's API.
+### 1. Get PR Metadata
+
+**MCP Call**: `get_pull_request`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
+
+This returns:
+- PR title and description
+- Source and target branches
+- Author information
+- Status (open, merged, closed)
+- Number of changed files, additions, deletions
+- Labels, milestone, linked issues
+
+### 2. Get Changed Files
+
+**MCP Call**: `get_pull_request_files`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
+
+This returns the full list of changed files with per-file
+additions, deletions, status, and patch content.
 
 ### 3. Analyze Changes
 
-Categorize and analyze the changes:
+Categorize and analyze the changes based on MCP responses:
 
 #### By File Type
 - Source code files (by language)
@@ -50,58 +85,25 @@ Categorize and analyze the changes:
 - Map changes to architectural layers
 
 #### By Change Type
-- New features
-- Bug fixes
-- Refactoring
-- Documentation updates
+- New features (detect from PR title prefix `feat:`)
+- Bug fixes (detect from PR title prefix `fix:`)
+- Refactoring (detect from PR title prefix `refactor:`)
+- Documentation updates (detect from PR title prefix `docs:`)
 - Configuration changes
-- Test additions/modifications
+- Test additions/modifications (detect from `fix:` prefix)
 
-### 4. Generate Summary
+### 4. Assess Risk
 
-Create a structured summary:
+Based on the analysis:
 
-```json
-{
-  "pr_number": "{PR_NUMBER}",
-  "pr_title": "Title of the PR",
-  "pr_description": "PR description text",
-  "author": "username",
-  "source_branch": "feature/branch-name",
-  "target_branch": "main",
-  "status": "open",
-  "created_at": "2026-03-13T12:00:00Z",
-  "stats": {
-    "files_changed": 10,
-    "additions": 500,
-    "deletions": 100,
-    "net_change": 400
-  },
-  "change_categories": {
-    "features": ["New feature X implemented"],
-    "fixes": ["Bug Y fixed in module Z"],
-    "refactoring": ["Code cleanup in service layer"],
-    "tests": ["Added tests for feature X"],
-    "docs": ["Updated README with new instructions"]
-  },
-  "affected_components": [
-    {
-      "name": "Authentication Module",
-      "files": ["src/auth/login.ts", "src/auth/session.ts"],
-      "change_type": "enhancement",
-      "impact": "medium"
-    }
-  ],
-  "risk_assessment": {
-    "level": "low|medium|high",
-    "reasons": ["Large number of files changed", "Core module modified"]
-  },
-  "testing_requirements": [
-    "Unit tests needed for new authentication flow",
-    "Integration tests recommended for API changes"
-  ]
-}
-```
+- File count and line change volume
+- Core module vs peripheral module changes
+- Security-sensitive file modifications
+- Database or API schema changes
+
+### 5. Generate Summary
+
+Create a structured summary using the format below.
 
 ## Output Format
 
@@ -110,16 +112,16 @@ Create a structured summary:
 ```
 PR #{PR_NUMBER}: {PR_TITLE}
 
-📊 Statistics:
+Statistics:
 - Files changed: {count}
 - Additions: +{additions}
 - Deletions: -{deletions}
 
-📝 Summary:
+Summary:
 {Brief description of changes}
 
-🏷️ Type: feature|fix|refactor|docs|test
-⚠️ Risk: low|medium|high
+Type: feature|fix|refactor|docs|test
+Risk: low|medium|high
 ```
 
 ### Standard Summary
@@ -128,32 +130,32 @@ PR #{PR_NUMBER}: {PR_TITLE}
 PR #{PR_NUMBER}: {PR_TITLE}
 
 Author: {author}
-Branch: {source_branch} → {target_branch}
+Branch: {source_branch} -> {target_branch}
 
-## 📊 Statistics
+## Statistics
 - Files changed: {count}
 - Additions: +{additions}
 - Deletions: -{deletions}
 
-## 📝 Change Summary
+## Change Summary
 {Detailed summary of what was changed and why}
 
-## 📁 Affected Components
+## Affected Components
 - **{Component Name}**: {change description}
 - **{Component Name}**: {change description}
 
-## 🏷️ Change Categories
-- ✨ Features: {count}
-- 🐛 Fixes: {count}
-- ♻️ Refactoring: {count}
-- 📚 Documentation: {count}
-- 🧪 Tests: {count}
+## Change Categories
+- Features: {count}
+- Fixes: {count}
+- Refactoring: {count}
+- Documentation: {count}
+- Tests: {count}
 
-## ⚠️ Risk Assessment
+## Risk Assessment
 Level: {low/medium/high}
 Reasons: {reasons}
 
-## ✅ Testing Recommendations
+## Testing Recommendations
 - {recommendation 1}
 - {recommendation 2}
 ```
@@ -163,7 +165,7 @@ Reasons: {reasons}
 Includes all of standard summary plus:
 
 ```
-## 📄 Changed Files
+## Changed Files
 
 ### Added Files
 - `path/to/file1.ext` - {description}
@@ -175,12 +177,12 @@ Includes all of standard summary plus:
 ### Deleted Files
 - `path/to/file4.ext` - {reason for deletion}
 
-## 🔗 Dependencies
+## Dependencies
 - New dependencies added: {list}
 - Dependencies removed: {list}
 - Dependencies updated: {list}
 
-## 🔍 Key Code Changes
+## Key Code Changes
 ### {Section Name}
 {Highlighted important code changes with context}
 ```
@@ -194,7 +196,8 @@ Includes all of standard summary plus:
 /asdm-pr-summary 123
 
 # Or follow the instruction
-Follow the instructions in .asdm/toolsets/code-review/actions/asdm-pr-summary.md
+Follow the instructions in
+.asdm/toolsets/code-review/actions/asdm-pr-summary.md
 ```
 
 ### Brief Summary
@@ -218,6 +221,14 @@ This action complements:
 - `asdm-pr-diff`: Uses diff data for detailed analysis
 - `asdm-pr-review`: Provides context for review decisions
 
+## MCP Tool Reference
+
+| MCP Server | Tool | Purpose |
+|------------|------|---------|
+| GitHub MCP Server | `get_pull_request` | Get PR metadata |
+| GitHub MCP Server | `get_pull_request_files` | Get changed files with patch |
+| GitHub MCP Server | `get_file_contents` | Get file content by path |
+
 ## Notes
 
 - Summary quality depends on PR description quality
@@ -227,4 +238,5 @@ This action complements:
 
 ## Configuration
 
-Refer to [pr-analysis-spec.md](../specs/pr-analysis-spec.md) for detailed analysis methodology.
+Refer to [pr-analysis-spec.md](../specs/pr-analysis-spec.md)
+for detailed analysis methodology.

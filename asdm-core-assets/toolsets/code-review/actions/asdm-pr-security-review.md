@@ -2,7 +2,10 @@
 
 ## Overview
 
-This action performs a security-focused code review on a Pull Request, specifically targeting security vulnerabilities, authentication issues, and data protection concerns.
+This action performs a security-focused code review on a Pull
+Request by fetching data via GitHub MCP tools, specifically
+targeting security vulnerabilities, authentication issues, and
+data protection concerns.
 
 ## Purpose
 
@@ -12,48 +15,104 @@ This action performs a security-focused code review on a Pull Request, specifica
 - Ensure secure data handling practices
 - Provide security-specific remediation guidance
 
-## Steps
+## Prerequisites
 
-1. **Gather Security Context**
-   - Understand the security requirements of the changed components
-   - Identify sensitive data flows
-   - Map authentication and authorization boundaries
-
-2. **Input Validation Analysis**
-   - Check all user inputs are validated
-   - Verify sanitization of untrusted data
-   - Identify potential injection points
-
-3. **Authentication & Authorization Review**
-   - Verify authentication mechanisms
-   - Check authorization logic
-   - Review session management
-   - Assess privilege escalation risks
-
-4. **Data Protection Analysis**
-   - Review sensitive data handling
-   - Check encryption implementations
-   - Verify secure data storage
-   - Assess data exposure risks
-
-5. **Common Vulnerability Scan**
-   - SQL Injection checks
-   - XSS vulnerability detection
-   - CSRF token validation
-   - Command injection analysis
-   - Path traversal detection
-
-6. **Generate Security Report**
-   - Document all security findings
-   - Provide severity classification
-   - Suggest remediation steps
-   - Reference security best practices
+- GitHub MCP Server must be connected and available
+- PR number or PR URL is required
 
 ## Input
 
-- PR number or URL
-- Target repository context
-- Optional: specific security concerns to focus on
+- **PR Number**: The identifier of the Pull Request (required)
+- **Focus Areas**: Optional specific security concerns to focus on
+
+## Steps
+
+### 0. Resolve Repository
+
+Determine the GitHub `owner` and `repo` from the current workspace:
+
+1. Run `git remote -v` to find the remote URL
+2. Parse `owner` and `repo` from the URL
+   - HTTPS: `https://github.com/{owner}/{repo}.git`
+   - SSH: `git@github.com:{owner}/{repo}.git`
+
+### 1. Language Detection (MUST be first)
+
+Detect and use the current environment's response language:
+
+1. Check system/user language settings or environment configuration
+2. Identify the primary language used in project documentation
+3. Apply the detected language consistently to ALL output
+
+**IMPORTANT**: The language detection is the FIRST step before
+any review content generation.
+
+### 2. Gather PR Data via MCP
+
+Call the following MCP tools in parallel:
+
+**MCP Call**: `get_pull_request`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
+
+**MCP Call**: `get_pull_request_files`
+
+| Parameter | Value |
+|-----------|-------|
+| `owner` | Resolved from git remote |
+| `repo` | Resolved from git remote |
+| `pull_number` | `{PR_NUMBER}` |
+
+### 3. Gather Security Context
+
+Using the PR metadata and changed files:
+
+- Understand the security requirements of changed components
+- Identify sensitive data flows from file paths and patch content
+- Map authentication and authorization boundaries
+- For security-sensitive files, use `get_file_contents` to read
+  full context when patch is insufficient
+
+### 4. Input Validation Analysis
+
+Based on the patch content from `get_pull_request_files`:
+
+- Check all user inputs are validated
+- Verify sanitization of untrusted data
+- Identify potential injection points
+
+### 5. Authentication & Authorization Review
+
+- Verify authentication mechanisms
+- Check authorization logic
+- Review session management
+- Assess privilege escalation risks
+
+### 6. Data Protection Analysis
+
+- Review sensitive data handling
+- Check encryption implementations
+- Verify secure data storage
+- Assess data exposure risks
+
+### 7. Common Vulnerability Scan
+
+- SQL Injection checks
+- XSS vulnerability detection
+- CSRF token validation
+- Command injection analysis
+- Path traversal detection
+
+### 8. Generate Security Report
+
+- Document all security findings
+- Provide severity classification
+- Suggest remediation steps
+- Reference security best practices
 
 ## Output
 
@@ -63,15 +122,6 @@ This action performs a security-focused code review on a Pull Request, specifica
   - Remediation recommendations
   - Code examples for fixes
   - Security best practices references
-
-## Language Detection
-
-Before performing review, detect and use the current environment's response language:
-
-1. **Detect Response Language**: Analyze the environment settings to determine the primary language
-2. **Apply Language Consistency**: Ensure all generated content uses the detected language
-
-**IMPORTANT**: The language detection is the FIRST step before any review content generation.
 
 ## Security Checklist
 
@@ -127,16 +177,13 @@ Before performing review, detect and use the current environment's response lang
 | Low | 0.1-3.9 | Minor security issue, limited impact |
 | Info | N/A | Security best practice recommendation |
 
-## Usage
+## MCP Tool Reference
 
-This action is invoked when a user needs security-focused code review on a Pull Request.
-
-### Example Invocation
-
-```shell
-# Security review of PR #123
-Follow the instructions in .asdm/toolsets/code-review/actions/asdm-pr-security-review.md
-```
+| MCP Server | Tool | Purpose |
+|------------|------|---------|
+| GitHub MCP Server | `get_pull_request` | Get PR metadata |
+| GitHub MCP Server | `get_pull_request_files` | Get changed files with patch |
+| GitHub MCP Server | `get_file_contents` | Get full file content for context |
 
 ## Output Format
 
